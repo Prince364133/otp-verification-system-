@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OTP Login - Skillyterns</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #loginBox, #homeScreen {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            width: 300px;
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            margin: 8px 0;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            width: 95%;
+            border: none;
+            background: #ff5722;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #crazyAnimation {
+            animation: spinAndZoom 1.5s infinite;
+        }
+        @keyframes spinAndZoom {
+            0% { transform: rotate(0deg) scale(1); background: yellow; }
+            25% { transform: rotate(180deg) scale(1.5); background: pink; }
+            50% { transform: rotate(360deg) scale(0.8); background: lime; }
+            75% { transform: rotate(720deg) scale(2); background: cyan; }
+            100% { transform: rotate(0deg) scale(1); background: orange; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginBox">
+        <h2>📱 OTP Login</h2>
+        <input type="text" id="phoneNumber" placeholder="+91XXXXXXXXXX">
+        <div id="recaptcha-container"></div>
+        <button onclick="sendOTP()">Send OTP</button>
+        <br>
+        <input type="text" id="otp" placeholder="Enter OTP">
+        <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+
+    <div id="homeScreen" style="display:none;">
+        <h1 id="crazyAnimation">🎉 Welcome to Skillyterns 🎉</h1>
+        <p style="font-size:20px;">You made it through OTP verification 🚀</p>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGPyk54-zJUE6iV3872XKLIq9OW3KCM6o",
+            authDomain: "skillyterns.firebaseapp.com",
+            databaseURL: "https://skillyterns-default-rtdb.firebaseio.com",
+            projectId: "skillyterns",
+            storageBucket: "skillyterns.firebasestorage.app",
+            messagingSenderId: "1034584532277",
+            appId: "1:1034584532277:web:fb79e2d96ee5127421d87c",
+            measurementId: "G-5G2GCWYEPL"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let confirmationResult;
+
+        // Render Recaptcha
+        window.onload = function () {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                size: 'normal',
+                callback: function(response) {
+                    console.log("Recaptcha Verified");
+                }
+            });
+            recaptchaVerifier.render();
+        }
+
+        function sendOTP() {
+            let number = document.getElementById("phoneNumber").value;
+            firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier)
+                .then(function (result) {
+                    confirmationResult = result;
+                    alert("OTP sent successfully!");
+                })
+                .catch(function (error) {
+                    alert(error.message);
+                });
+        }
+
+        function verifyOTP() {
+            let otp = document.getElementById("otp").value;
+            confirmationResult.confirm(otp)
+                .then(function (result) {
+                    document.getElementById("loginBox").style.display = "none";
+                    document.getElementById("homeScreen").style.display = "block";
+                })
+                .catch(function (error) {
+                    alert("Invalid OTP!");
+                });
+        }
+    </script>
+</body>
+</html>
